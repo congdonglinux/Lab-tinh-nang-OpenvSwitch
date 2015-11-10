@@ -108,16 +108,8 @@ Ping cùng VLAN và khác VLAN, ta có kết quả như sau:
 
 | STT | Thực hiện | kiểm tra| kết quả |
 |--------------|-------|------|-------|
-| 1 | VM1 – br0 gắn vào VLAN2
-VM3 – br1 gắn vào VLAN2 | Ping VM1 và VM3 | Thành công |
-| 2 | VM2 – br0 gắn vào VLAN3
-VM4 – br1 gắn vào VLAN3 | 
-Ping VM2 và VM4
- | Thành công |
-| 3 | VM1 – br0 gắn vào VLAN2
-VM2 – br0 gắn vào VLAN3 | Ping VM1 và VM2 | Không thành công.
-Do khác Vlan. |
-| 4 | VM3 – br1 gắn vào VLAN2
-VM4 – br1 gắn vào VLAN3 | Ping  VM3 và VM4 | Không thành công.
-Do khác Vlan. |
+| 1 | VM1 – br0 gắn vào VLAN2, VM3 – br1 gắn vào VLAN2 | Ping VM1 và VM3 | Thành công |
+| 2 | VM2 – br0 gắn vào VLAN3, VM4 – br1 gắn vào VLAN3 | Ping VM2 và VM4 | Thành công |
+| 3 | VM1 – br0 gắn vào VLAN2, VM2 – br0 gắn vào VLAN3 | Ping VM1 và VM2 | Không thành công do khác Vlan. |
+| 4 | VM3 – br1 gắn vào VLAN2, VM4 – br1 gắn vào VLAN3 | Ping  VM3 và VM4 | Không thành công do khác Vlan. |
 
