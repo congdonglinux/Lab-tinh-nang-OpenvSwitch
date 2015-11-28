@@ -48,7 +48,8 @@ Kết quả trả về :
 Chứng tỏ máy chủ có khả năng hỗ trợ ảo hóa 
 
 #####-Bước 2: Cài đặt các gói cần thiết:
-	#apt-get install -y install qemu-kvm libvirt-bin virtinst bridge-utils
+	#apt-get update && apt-get upgrade
+	#apt-get install -y qemu-kvm libvirt-bin virtinst bridge-utils
 	#apt-get install -y openvswitch-switch openvswitch-datapath-dkms
 
 #####-Bước 3:Tạo ra các máy ảo bằng kvm: 
