@@ -2,7 +2,7 @@
 
 ###1.Mô hình bài lab
 
-<img src="http://i.imgur.com/dZ8vDIP.png">
+<img src="http://i.imgur.com/z0VN4Pv.png">
 
 ###2.Chuẩn bị: 
 
