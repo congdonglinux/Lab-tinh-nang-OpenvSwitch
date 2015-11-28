@@ -56,9 +56,9 @@ Chứng tỏ máy chủ có khả năng hỗ trợ ảo hóa
 
 
     #virt-install \
-    --name template \
+    --name vm1 \
     --ram 2048 \
-    --disk path=/var/kvm/images/template.img,size=30 \
+    --disk path=/var/kvm/images/vm1.img,size=30 \
     --vcpus 2 \
     --os-type linux \
     --os-variant ubuntutrusty \
@@ -67,7 +67,7 @@ Chứng tỏ máy chủ có khả năng hỗ trợ ảo hóa
     --location 'http://jp.archive.ubuntu.com/ubuntu/dists/trusty/main/installer-amd64/' \
     --extra-args 'console=ttyS0,115200n8 serial'
 
-
+   Tạo ra các vm2 vm3 vm4 tương tự như trên
    Sau khi tạo, các máy ảo sẽ tự động được cắm vào switch virbr0 được tạo ra bởi linux bridge và nhận ip tự động thuộc dải này. Ta cần tiến hành ngắt kết nối các máy ảo tới switch này để không ảnh hưởng kết quả bài lab:
 
 	#brctl show
