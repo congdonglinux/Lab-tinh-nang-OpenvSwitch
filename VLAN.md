@@ -54,31 +54,47 @@ Chứng tỏ máy chủ có khả năng hỗ trợ ảo hóa
 
 #####-Bước 3:Tạo ra các máy ảo bằng kvm: 
 
+- Disable virbr0 để không ảnh hưởng kết quả bài lab. virbr0 là bridge mặc định được tạo ra bởi linux bridge, các máy ảo sẽ tự động cắm vào bridge này khi launch lên:
 
-    #virt-install \
-    --name vm1 \
-    --ram 2048 \
-    --disk path=/var/kvm/images/vm1.img,size=30 \
-    --vcpus 2 \
-    --os-type linux \
-    --os-variant ubuntutrusty \
-    --graphics none \
-    --console pty,target_type=serial \
-    --location 'http://jp.archive.ubuntu.com/ubuntu/dists/trusty/main/installer-amd64/' \
-    --extra-args 'console=ttyS0,115200n8 serial'
+        #virsh net-destroy default
 
-   Tạo ra các vm2 vm3 vm4 tương tự như trên
-   Sau khi tạo, các máy ảo sẽ tự động được cắm vào switch virbr0 được tạo ra bởi linux bridge và nhận ip tự động thuộc dải này. Ta cần tiến hành ngắt kết nối các máy ảo tới switch này để không ảnh hưởng kết quả bài lab:
+- Tạo các switch ảo bằng openvswitch:
 
-	#brctl show
-	#brctl delif virbr0 vnet0
+        #ovs-vsctl add-br br0
+        #ovs-vsctl add-br br1
+
+- Tạo scripts để thực hiện chuyển đổi card cho các máy vm:
+
+   `#vi /etc/qemu-ifup`
+
+        #!/bin/sh
+        switch='br0'
+        /sbin/ifconfig $1 0.0.0.0 up
+        ovs-vsctl add-port ${switch} $1
+
+  `#vi /etc/qemu-ifup`
+
+        #!/bin/sh
+        switch='br0'
+        /sbin/ifconfig $1 0.0.0.0 down
+        ovs-vsctl del-port ${switch} $1
+
+- Cấp quyền cho các file này:
+
+        #chmod +x /etc/qemu-if*
+
+- Tạo các máy ảo gắn vào br0:
 
 
-Sửa ip cho các máy ảo sao cho VM1 và VM3 cùng 1 dải mạng, VM2 và VM4 cùng 1 dải mạng.
+        #kvm -m 512 -net nic,macaddr=12:42:52:CC:CC:15 -net tap,script=/etc/qemu-ifup /cirros-0.3.0-i386-disk.img
 
-#####-Bước 4: Tạo các switch ảo bằng openvswitch:
-	#ovs-vsctl add-br br0
-	#ovs-vsctl add-br br1
+   Tạo ra các vm2 vm3 vm4 tương tự như trên. Lưu ý sửa file script để vm2 nhận br0 , vm3 và vm4 nhận br1
+  
+
+- Sửa ip cho các máy ảo sao cho VM1 và VM3 cùng 1 dải mạng, VM2 và VM4 cùng 1 dải mạng.
+
+#####-Bước 4: Nối các switch ảo:
+	
 
 Nối 2 switch này với nhau, đường nối này sẽ mặc định là đường trunk. Để tạo ra kết nối này, cần tạo ra 2 port riêng rẽ trên 2 switch và nối chúng với nhau:
 
@@ -87,23 +103,17 @@ Nối 2 switch này với nhau, đường nối này sẽ mặc định là đư
     #ovs-vsctl set interface P0 type=patch options:peer=P1
     #ovs-vsctl set interface P1 type=patch options:peer=P0
 
-
-#####-Bước 5: Gắn các VM vào switch thông qua dây nhảy mạng tap:
-	#ovs-vsctl add-port br0 vnet0
-	#ovs-vsctl add-port br0 vnet1
-	#ovs-vsctl add-port br1 vnet2
-	#ovs-vsctl add-port br1 vnet3
  
-#####-Bước 6: Gán các VM vào các VLAN: 
+#####-Bước 5: Gán các VM vào các VLAN: 
 Với VM1, VM3 thuộc VLAN2. VM2, VM4 thuộc VLAN3
 
-    #ovs-vsctl set port vnet0 tag=2
-    #ovs-vsctl set port vnet2 tag=2
-    #ovs-vsctl set port vnet1 tag=3
-    #ovs-vsctl set port vnet3 tag=3
+    #ovs-vsctl set port tap0 tag=2
+    #ovs-vsctl set port tap2 tag=2
+    #ovs-vsctl set port tap1 tag=3
+    #ovs-vsctl set port tap3 tag=3
 
 
-###6.Tiến hành test:
+###5.Tiến hành test:
 Ping cùng VLAN và khác VLAN, ta có kết quả như sau: 
 
 
@@ -113,4 +123,3 @@ Ping cùng VLAN và khác VLAN, ta có kết quả như sau:
 | 2 | VM2 – br0 gắn vào VLAN3, VM4 – br1 gắn vào VLAN3 | Ping VM2 và VM4 | Thành công |
 | 3 | VM1 – br0 gắn vào VLAN2, VM2 – br0 gắn vào VLAN3 | Ping VM1 và VM2 | Không thành công do khác Vlan. |
 | 4 | VM3 – br1 gắn vào VLAN2, VM4 – br1 gắn vào VLAN3 | Ping  VM3 và VM4 | Không thành công do khác Vlan. |
-
